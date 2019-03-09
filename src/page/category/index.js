@@ -2,8 +2,7 @@ import React, {Component} from 'react'
 import {Button, Col, Form, Input, message, Modal, Popconfirm, Row, Table} from 'antd'
 import BasicServer from '../../utils/request'
 import urls from '../../utils/urls'
-import WrappedEditModel from '../../components/EditModel'
-
+import CategoryEditModel from '../../components/CategoryEditModel'
 export default class Category extends Component {
 	state = {
 		dataSource: [],
@@ -14,7 +13,10 @@ export default class Category extends Component {
 		pagination: {
 			current: 1,
 			pageSize: 5
-		}
+		},
+		keyword: '', // 查询字段
+		multiple: false, // 删除多选
+		selectedRowKeys: [] // 选中项
 	}
 
 	componentWillMount() {
@@ -27,6 +29,12 @@ export default class Category extends Component {
 			isCreate: true,
 			editVisible: true
 		})
+	}
+	// 全部删除
+	delete = () => {
+		this.setState({
+			multiple: true
+		}, this.removeCategory(this.state.selectedRowKeys[0]))
 	}
 	editConform = () => {
 		this.EditForm.props.form.validateFields((err, category) => {
@@ -67,7 +75,8 @@ export default class Category extends Component {
 			type: 'get',
 			data: {
 				pageNum: this.state.pagination.current,
-				pageSize: this.state.pagination.pageSize
+				pageSize: this.state.pagination.pageSize,
+				keyword: this.state.keyword
 			}
 		})
 			.then(res => {
@@ -105,7 +114,11 @@ export default class Category extends Component {
 		BasicServer.ajax({
 			url: urls.category,
 			type: 'delete',
-			id
+			id,
+			multiple: this.state.multiple,
+			data: {
+				ids: this.state.selectedRowKeys
+			}
 		})
 			.then(res => {
 				if (res.code === 0) {
@@ -116,6 +129,13 @@ export default class Category extends Component {
 					message.error('失败')
 				}
 			})
+	}
+
+	// 多选
+	rowSelection = {
+		onChange: (selectedRowKeys) => {
+			this.setState({selectedRowKeys})
+		}
 	}
 
 	render() {
@@ -147,26 +167,27 @@ export default class Category extends Component {
 		return (
 			<div style={{ 'padding': '15px' }}>
 				<Row>
-					<Col span={3}>
+					<Col span={4}>
 						<Button type='primary' onClick={this.create}>添加分类</Button>
 					</Col>
-					<Col span={18}>
+					<Col span={4}>
+						<Button type='danger' style={{marginLeft: '10px'}} onClick={this.delete}>全部删除</Button>
+					</Col>
+					<Col span={10}>
 						<Input.Search
 							enterButton
 							placeholder='请输入分类'
-							onSearch={(keyword) => {
-								console.log(keyword)
-							}}
+							onSearch={keyword => this.setState({keyword}, this.getList)}
 						/>
 					</Col>
 				</Row>
-				<Row>
+				<Row style={{marginTop: '12px'}}>
 					<Col span={24}>
 						<Table
 							dataSource={this.state.dataSource}
 							columns={columns}
 							pagination={this.state.pagination}
-
+							rowSelection={this.rowSelection}
 						/>
 						<Modal
 							onOk={this.editConform}
@@ -174,8 +195,9 @@ export default class Category extends Component {
 						   	okText='确定'
 						   	cancelText='取消'
 							destroyOnClose
-						   	visible={this.state.editVisible} title={this.state.title}>
-							<WrappedEditModel
+						   	visible={this.state.editVisible}
+							title={this.state.title}>
+							<CategoryEditModel
 								wrappedComponentRef={inst => this.EditForm = inst}
 								isCreate={this.state.isCreate}
 								item={this.state.item}

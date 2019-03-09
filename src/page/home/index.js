@@ -9,13 +9,12 @@ export default class Admin extends Component {
 	loginSubmit = (isSignUp, value) => {
 		BasicServer.ajax({
 			url: isSignUp ? urls.signup : urls.signin,
-			data: value
+			data: value,
+			type: 'post'
 		})
 			.then(res => {
-				console.log(res.data)
 				if (res.code === 0) {
 					if (! isSignUp) {
-						console.log(res)
 						sessionStorage.setItem('username', res.data.username)
 					}
 					this.props.history.push('/admin')
@@ -58,7 +57,6 @@ class LoginForm extends Component {
 	}
 	submitLogin = () => {
 		const data = this.props.form.getFieldsValue()
-		// console.log(data)
 		this.props.loginSubmit(
 			this.state.isSignUp,
 			data

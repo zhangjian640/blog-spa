@@ -26,10 +26,14 @@ export default class BasicServer {
 			let url = ''
 			if (option.type === 'get') {
 				url = option.url + '?' + (option.type === 'get' ? this.encodeSearchParams(option.data) : '')
-			} else if (option.type === 'put' ||option.type === 'delete') {
+			} else if (option.type === 'put') {
 				url = option.url + '/' + option.id
 			} else if (option.type === 'post') {
 				url = option.url
+			} else if (option.type === 'delete') {
+				url = option.url + '/' + option.id
+			} else if (option.type === 'delete' && option.multiple) {
+				url = option.url + '/' + option.data.ids[0]
 			}
 			axios({
 				url,
@@ -43,7 +47,6 @@ export default class BasicServer {
 					if (response.status === 200) {
 						const result = response.data
 						if (result.error) {
-							console.log(result.error.message)
 						}
 						resolve(result)
 					} else {

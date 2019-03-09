@@ -1,7 +1,7 @@
 import React, {Component} from 'react'
 import {Form, Input} from 'antd'
 
-class EditModel extends Component {
+class CategoryEditModel extends Component {
 
 	render () {
 		const { getFieldDecorator } = this.props.form
@@ -21,4 +21,4 @@ class EditModel extends Component {
 	}
 }
 
-export default Form.create({})(EditModel)
+export default Form.create({})(CategoryEditModel)

@@ -20,7 +20,6 @@ class Header extends Component{
 			url: urls.signout
 		})
 			.then(res => {
-				console.log(res.data)
 				if (res.code === 0) {
 					sessionStorage.removeItem('username')
 					this.props.history.push('/')
